@@ -34,6 +34,9 @@
         , -1px -1px rgba(0, 0, 0, 255)
       ;
     }
+    button.appbutton {
+        padding: 0px;
+    }
     #toplevel {
       background-color: rgba(0, 0, 0, 0.6);
     }
@@ -234,6 +237,7 @@
           :relief Gtk.ReliefStyle.NONE
           :on_clicked #(launch app)
           })
+    (-> (: :get_style_context) (: :add_class "appbutton"))
     (: :add
        (doto (Gtk.Box {:orientation Gtk.Orientation.VERTICAL})
          (: :add app.IconImage)
