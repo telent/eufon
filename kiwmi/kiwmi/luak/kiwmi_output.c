@@ -9,6 +9,7 @@
 
 #include <lauxlib.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/interfaces/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
@@ -55,6 +56,31 @@ l_kiwmi_output_move(lua_State *L)
     int ly = lua_tonumber(L, 3);
 
     wlr_output_layout_move(output_layout, output->wlr_output, lx, ly);
+
+    return 0;
+}
+
+static int
+l_kiwmi_output_set_mode(lua_State *L)
+{
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_output");
+    luaL_checktype(L, 2, LUA_TNUMBER); // w
+    luaL_checktype(L, 3, LUA_TNUMBER); // h
+    luaL_checktype(L, 4, LUA_TNUMBER); // refresh
+
+    if (!obj->valid) {
+        return luaL_error(L, "kiwmi_output no longer valid");
+    }
+
+    struct kiwmi_output *output             = obj->object;
+    //    struct wlr_output_layout *output_layout = output->desktop->output_layout;
+
+    int w = lua_tonumber(L, 2);
+    int h = lua_tonumber(L, 3);
+    int refresh = lua_tonumber(L, 4);
+
+    wlr_output_update_custom_mode(output->wlr_output, w, h, refresh);
 
     return 0;
 }
@@ -170,6 +196,7 @@ static const luaL_Reg kiwmi_output_methods[] = {
     {"pos", l_kiwmi_output_pos},
     {"redraw", l_kiwmi_output_redraw},
     {"size", l_kiwmi_output_size},
+    {"set_mode", l_kiwmi_output_set_mode},
     {"usable_area", l_kiwmi_output_usable_area},
     {NULL, NULL},
 };
