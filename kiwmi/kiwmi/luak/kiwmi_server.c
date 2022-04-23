@@ -147,6 +147,55 @@ l_kiwmi_server_output_at(lua_State *L)
 }
 
 static int
+new_kiwmi_output(lua_State *L, void *lua, struct wlr_output *wlr_output)
+{
+    if (wlr_output) {
+        lua_pushcfunction(L, luaK_kiwmi_output_new);
+        lua_pushlightuserdata(L, lua);
+        lua_pushlightuserdata(L, wlr_output->data);
+        if (lua_pcall(L, 2, 1, 0)) {
+            wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));
+            return 0;
+        }
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+l_kiwmi_server_next_output(lua_State *L)
+{
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_server");
+
+    struct kiwmi_server *server = obj->object;
+
+    struct kiwmi_output *found = 0;
+    struct kiwmi_output *current = 0;
+
+    if((lua_gettop(L) > 2) && !lua_isnil(L, 3)) {
+	obj =
+	    *(struct kiwmi_object **)luaL_checkudata(L, 3, "kiwmi_output");
+	if (!obj->valid) {
+	    return luaL_error(L, "kiwmi_output no longer valid");
+	}
+	current = obj->object;
+    }
+
+    struct kiwmi_output *output;
+    wl_list_for_each(output, &(server->desktop).outputs, link) {
+	if((found == current) || (current == 0))
+	    return new_kiwmi_output(L, obj->lua, output->wlr_output);
+
+	if(current->wlr_output == output->wlr_output)
+	    found = current;
+    }
+    lua_pushnil(L);
+    return 1;
+}
+
+static int
 l_kiwmi_server_quit(lua_State *L)
 {
     struct kiwmi_object *obj =
@@ -345,6 +394,7 @@ static const luaL_Reg kiwmi_server_methods[] = {
     {"unfocus", l_kiwmi_server_unfocus},
     {"verbosity", l_kiwmi_server_verbosity},
     {"view_at", l_kiwmi_server_view_at},
+    {"outputs", l_kiwmi_server_next_output},
     {NULL, NULL},
 };
 
