@@ -1,14 +1,19 @@
 { stdenv
 , callPackage
+, fennel
 , lua5_3
-
 } :
 let
-  kiwmi = callPackage ./kiwmi.nix { lua = lua5_3; };
+  fennel_ = (fennel.override { lua = lua5_3; });
+  luaWithPackages = lua5_3.withPackages (ps: with ps; [
+    (toLuaModule fennel_)
+    busted
+  ]);
+  kiwmi = callPackage ./kiwmi.nix { lua = luaWithPackages; };
 in
 stdenv.mkDerivation {
   pname = "eufon";
   version = "0.1";
-  buildInputs = [ kiwmi ];
+  buildInputs = [ luaWithPackages kiwmi ];
   src = ./.;
 }
