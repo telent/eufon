@@ -14,7 +14,6 @@
        ((require :pl.import_into)))
 
 (local dbus (require :dbus_proxy))
-(local inspect (require :inspect))
 (local lfs (require :lfs))
 (local inifile (require :inifile))
 (local posix (require :posix))
