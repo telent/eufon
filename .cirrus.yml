@@ -1,0 +1,18 @@
+task:
+  container:
+    image: archlinux:base-devel
+
+  matrix:
+    - name: Build (clang)
+      script:
+        - sudo pacman --noconfirm -Syu
+        - sudo pacman --noconfirm -S git meson ninja lua51 wlroots wayland-protocols
+        - meson build -Dlua-pkg=lua51 --werror
+        - ninja -C build
+
+    - name: Format
+      script:
+        - sudo pacman --noconfirm -Syu
+        - sudo pacman --noconfirm -S clang git
+        - find -name .git -prune -o -type f -name '*.[ch]' -print | xargs -d '\n' clang-format -i
+        - git diff --exit-code
