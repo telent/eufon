@@ -18,7 +18,7 @@
 , scdoc
 , wayland
 , wayland-protocols
-, wlroots
+, wlroots_0_15
 , xwayland
 }:
 
@@ -49,7 +49,7 @@ stdenv.mkDerivation rec {
     pango
     wayland
     wayland-protocols
-    wlroots
+    wlroots_0_15
     xwayland
   ];
 
