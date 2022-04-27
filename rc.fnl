@@ -14,4 +14,5 @@
 (kiwmi:spawn "lua -l fennelrun modeline.fnl")
 (kiwmi:spawn "lua -l fennelrun saturn/main.fnl")
 (kiwmi:spawn "lua -l fennelrun crier/crier.fnl")
+(kiwmi:spawn "lua -l fennelrun just/just.fnl")
 ;(kiwmi:spawn "foot")

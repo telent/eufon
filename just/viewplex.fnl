@@ -1,7 +1,7 @@
 (local { : Gtk : Gdk : WebKit2 : cairo } (require :lgi))
-(local Webview (require :webview))
 
-(local Listeners (require :listeners))
+(local Webview (require :just.webview))
+(local Listeners (require :just.listeners))
 
 (local thumbnail-width 300)
 (local thumbnail-height 200)

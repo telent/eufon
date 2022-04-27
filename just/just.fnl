@@ -1,14 +1,13 @@
 (local lgi (require :lgi))
-(local inspect (require :inspect))
 
 (local { : Gtk : Gdk : WebKit2 : cairo } lgi)
 
 (if (os.getenv "JUST_HACKING")
     (local {: view} (require :fennel)))
 
-(local Listeners (require :listeners))
-(local Webview (require :webview))
-(local Viewplex (require :viewplex))
+(local Listeners (require :just.listeners))
+(local Webview (require :just.webview))
+(local Viewplex (require :just.viewplex))
 
 (local cache-dir (.. (os.getenv "HOME") "/.cache/just"))
 

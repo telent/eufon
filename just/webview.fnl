@@ -1,7 +1,7 @@
 (local { : Gtk : Gdk : WebKit2 : cairo  : GLib : GObject } (require :lgi))
 (local posix (require :posix))
 
-(local Listeners (require :listeners))
+(local Listeners (require :just.listeners))
 
 ;; this is a hack, should find out what XDG says
 (local downloads-directory (.. (os.getenv "HOME") "/" "Downloads"))

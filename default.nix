@@ -3,7 +3,9 @@
 , fetchFromGitHub
 
 , fennel
+, glib-networking
 , gobject-introspection
+, webkitgtk
 , gtk3
 , gtk-layer-shell
 , lua5_3
@@ -15,6 +17,7 @@ let
     inherit (lua.pkgs) lgi buildLuaPackage;
     inherit lua;
   };
+  glib_networking_gio  = "${glib-networking}/lib/gio/modules";
   inifile = lua.pkgs.buildLuaPackage rec {
     pname  = "inifile";
     name = "${pname}-${version}";
@@ -43,16 +46,20 @@ let
 
   ]);
   kiwmi = callPackage ./kiwmi.nix { lua = lua5_3; };
+  GIO_EXTRA_MODULES = "${glib-networking}/lib/gio/modules";
 in
 stdenv.mkDerivation {
   pname = "eufon";
   version = "0.1";
+  inherit GIO_EXTRA_MODULES;
   buildInputs = [
     luaWithPackages
     kiwmi
+    glib-networking
     gobject-introspection.dev
     gtk-layer-shell
     gtk3
+    webkitgtk
   ];
 
   src = ./.;
