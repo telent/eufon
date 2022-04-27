@@ -24,3 +24,25 @@ As of 2022 these principles are more aspirational than actual.
 This is suboptimally hairy, at least for the moment: Nix makes a
 wrapper script for the Lua executable that has appropriate `LUA_PATH`
 and `LUA_CPATH` settings, but it doesn't do the same for kiwmi
+
+
+# TODO
+
+## Packages
+
+[ ] notifications (crier)
+[ ] keyboard
+[ ] web browser (just)
+[ ] wifi network chooser
+[ ] settings: toggle network interfaces, change volume & screen brightness
+
+## Other
+
+[ ] better window management
+ - gestures to switch view
+ - gesture to launch terminal?
+ - some way to kill an app
+
+[ ] some way to add launcher shortcuts for Fennel functions
+[ ] hook up system to session bus, to handle incoming calls
+[ ] kiwmi: support reloading config or otherwise making live changes
