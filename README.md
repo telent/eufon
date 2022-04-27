@@ -19,20 +19,21 @@ As of 2022 these principles are more aspirational than actual.
 ## Running it
 
      $ nix-shell build.nix
-     nix-shell$ lua -e 'os.execute("kiwmi -c init.lua")'
+     nix-shell$ make run
 
-This is suboptimally hairy, at least for the moment: Nix makes a
-wrapper script for the Lua executable that has appropriate `LUA_PATH`
-and `LUA_CPATH` settings, but it doesn't do the same for kiwmi
+`make run` executes `lua -e 'os.execute("kiwmi -c init.lua")'`.  This
+is suboptimally hairy, at least for the moment: Nix makes a wrapper
+script for the Lua executable that has appropriate `LUA_PATH` and
+`LUA_CPATH` settings, but it doesn't do the same for kiwmi.
 
 
 # TODO
 
 ## Packages
 
-[ ] notifications (crier)
-[ ] keyboard
+[X] notifications (crier)
 [ ] web browser (just)
+[ ] keyboard
 [ ] wifi network chooser
 [ ] settings: toggle network interfaces, change volume & screen brightness
 
@@ -42,7 +43,9 @@ and `LUA_CPATH` settings, but it doesn't do the same for kiwmi
  - gestures to switch view
  - gesture to launch terminal?
  - some way to kill an app
+ - kiwmi may or may not have touch support
 
 [ ] some way to add launcher shortcuts for Fennel functions
 [ ] hook up system to session bus, to handle incoming calls
 [ ] kiwmi: support reloading config or otherwise making live changes
+[ ] why are overlay windows overlapping regular view?
