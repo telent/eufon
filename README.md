@@ -49,3 +49,4 @@ script for the Lua executable that has appropriate `LUA_PATH` and
 [ ] hook up system to session bus, to handle incoming calls
 [ ] kiwmi: support reloading config or otherwise making live changes
 [ ] why are overlay windows overlapping regular view?
+[ ] screen lock
