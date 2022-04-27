@@ -7,7 +7,8 @@
 (local variant dbus.variant)
 (local Gtk lgi.Gtk)
 
-(local inspect (require :inspect))
+(fn relpath [filename]
+  (.. "crier/" filename))
 
 (local dbus-service-attrs
        {
@@ -48,7 +49,7 @@
     DBUS_REQUEST_NAME_REPLY_EXISTS
     (error "already running")))
 
-(let [css (: (io.open "styles.css") :read "*a")
+(let [css (: (io.open (relpath "styles.css")) :read "*a")
       style_provider (Gtk.CssProvider)]
   (style_provider:load_from_data css)
   (Gtk.StyleContext.add_provider_for_screen
@@ -212,8 +213,9 @@
    :timeout timeout
    })
 
+
 (local interface-info
-       (let [xml (: (io.open "interface.xml" "r") :read "*a")
+       (let [xml (: (io.open (relpath "interface.xml") "r") :read "*a")
              node-info (Gio.DBusNodeInfo.new_for_xml xml)]
          (. node-info.interfaces 1)))
 
@@ -244,8 +246,6 @@
         (invocation:return_value (GV (.. "(" sig ")") vals))
         _
         (invocation:return_value nil)))))
-
-
 
 (fn handle-dbus-get [conn sender path interface name]
   (when (and (= path dbus-service-attrs.path)

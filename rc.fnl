@@ -13,4 +13,5 @@
 ;(kiwmi:spawn "swaybg -c '#ff00ff'")
 (kiwmi:spawn "lua -l fennelrun modeline.fnl")
 (kiwmi:spawn "lua -l fennelrun saturn/main.fnl")
-(kiwmi:spawn "foot")
+(kiwmi:spawn "lua -l fennelrun crier/crier.fnl")
+;(kiwmi:spawn "foot")
