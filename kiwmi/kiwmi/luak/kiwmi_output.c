@@ -18,6 +18,7 @@
 #include "luak/kiwmi_lua_callback.h"
 #include "luak/lua_compat.h"
 #include "server.h"
+#include "luak/kiwmi_renderer.h"
 
 static int
 l_kiwmi_output_auto(lua_State *L)
@@ -188,6 +189,36 @@ l_kiwmi_output_usable_area(lua_State *L)
     return 1;
 }
 
+static int
+l_kiwmi_output_renderer(lua_State *L)
+{
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_output");
+
+    if (!obj->valid) {
+        return luaL_error(L, "kiwmi_output no longer valid");
+    }
+
+    struct kiwmi_output *output = obj->object;
+
+    struct kiwmi_desktop *desktop = output->desktop;
+    struct kiwmi_server *server   = wl_container_of(desktop, server, desktop);
+    struct wlr_renderer *renderer = server->renderer;
+
+    lua_pushcfunction(L, luaK_kiwmi_renderer_new);
+    lua_pushlightuserdata(L, server->lua);
+    lua_pushlightuserdata(L, renderer);
+    lua_pushlightuserdata(L, output->wlr_output);
+
+    if (lua_pcall(L, 3, 1, 0)) {
+        wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));
+        lua_pop(L, 1);
+        return 0;
+    }
+    return 1;
+}
+
+
 static const luaL_Reg kiwmi_output_methods[] = {
     {"auto", l_kiwmi_output_auto},
     {"move", l_kiwmi_output_move},
@@ -195,6 +226,7 @@ static const luaL_Reg kiwmi_output_methods[] = {
     {"on", luaK_callback_register_dispatch},
     {"pos", l_kiwmi_output_pos},
     {"redraw", l_kiwmi_output_redraw},
+    {"renderer", l_kiwmi_output_renderer},
     {"size", l_kiwmi_output_size},
     {"set_mode", l_kiwmi_output_set_mode},
     {"usable_area", l_kiwmi_output_usable_area},

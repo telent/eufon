@@ -15,6 +15,8 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
+#include <drm/drm_fourcc.h>
+
 #include "color.h"
 #include "desktop/output.h"
 #include "luak/lua_compat.h"
@@ -57,8 +59,66 @@ l_kiwmi_renderer_draw_rect(lua_State *L)
     return 0;
 }
 
+static int
+l_kiwmi_renderer_draw_texture(lua_State *L)
+{
+    struct kiwmi_renderer *renderer =
+        (struct kiwmi_renderer *) luaL_checkudata(L, 1, "kiwmi_renderer");
+    struct wlr_texture *texture = (struct wlr_texture *) lua_touserdata(L, 2);
+
+    float projection[9];
+
+    for(int i=0; i<9; i++) {
+	lua_pushnumber(L, i+1);
+	lua_gettable(L, 3);
+	projection[i] = lua_tointeger(L, -1);
+    }
+
+    luaL_checktype(L, 4, LUA_TNUMBER); /* x  */
+    luaL_checktype(L, 5, LUA_TNUMBER); /* y  */
+    luaL_checktype(L, 6, LUA_TNUMBER); // alpha
+
+    struct wlr_renderer *wlr_renderer = renderer->wlr_renderer;
+
+    wlr_render_texture(wlr_renderer, texture, projection,
+		       lua_tonumber(L, 4),
+		       lua_tonumber(L, 5),
+		       lua_tonumber(L, 6));
+
+    return 0;
+}
+
+static int
+l_kiwmi_renderer_texture_from_pixels(lua_State *L)
+{
+    struct kiwmi_renderer *renderer =
+        (struct kiwmi_renderer *)luaL_checkudata(L, 1, "kiwmi_renderer");
+
+    struct wlr_renderer *wlr_renderer = renderer->wlr_renderer;
+    struct wlr_texture * texture;
+
+    luaL_checktype(L, 2, LUA_TNUMBER); // stride
+    luaL_checktype(L, 3, LUA_TNUMBER); // width
+    luaL_checktype(L, 4, LUA_TNUMBER); // height
+
+    char *data =  lua_tostring(L, 5);
+
+    texture = wlr_texture_from_pixels(wlr_renderer,
+				      DRM_FORMAT_ARGB8888,
+				      lua_tonumber(L, 2),
+				      lua_tonumber(L, 3),
+				      lua_tonumber(L, 4),
+				      data);
+
+    lua_pushlightuserdata(L, texture);
+
+    return 1;
+}
+
 static const luaL_Reg kiwmi_renderer_methods[] = {
     {"draw_rect", l_kiwmi_renderer_draw_rect},
+    {"draw_texture", l_kiwmi_renderer_draw_texture},
+    {"texture_from_pixels", l_kiwmi_renderer_texture_from_pixels},
     {NULL, NULL},
 };
 
