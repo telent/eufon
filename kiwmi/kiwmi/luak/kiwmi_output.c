@@ -305,9 +305,12 @@ kiwmi_output_on_render_notify(struct wl_listener *listener, void *data)
     struct kiwmi_lua_callback *lc = wl_container_of(listener, lc, listener);
     struct kiwmi_server *server   = lc->server;
     lua_State *L                  = server->lua->L;
-    struct kiwmi_output *output   = data;
+    struct kiwmi_render_data *rdata = data;
+    struct kiwmi_output *output   = rdata->output->data;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, lc->callback_ref);
+
+    lua_newtable(L);
 
     lua_pushcfunction(L, luaK_kiwmi_output_new);
     lua_pushlightuserdata(L, server->lua);
@@ -318,6 +321,20 @@ kiwmi_output_on_render_notify(struct wl_listener *listener, void *data)
         lua_pop(L, 1);
         return;
     }
+    lua_setfield(L, -2, "output");
+
+    lua_pushcfunction(L, luaK_kiwmi_renderer_new);
+    lua_pushlightuserdata(L, server->lua);
+    lua_pushlightuserdata(L, rdata->renderer);
+    lua_pushlightuserdata(L, output);
+
+    if (lua_pcall(L, 3, 1, 0)) {
+        wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));
+        lua_pop(L, 1);
+        return;
+    }
+
+    lua_setfield(L, -2, "renderer");
 
     if (lua_pcall(L, 1, 0, 0)) {
         wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));

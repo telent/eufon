@@ -230,7 +230,8 @@ output_frame_notify(struct wl_listener *listener, void *data)
         wl_signal_emit(&view->events.post_render, &rdata);
     }
 
-    wl_signal_emit(&output->events.render, output);
+    rdata.data = NULL;
+    wl_signal_emit(&output->events.render, &rdata);
 
     render_layer(&output->layers[ZWLR_LAYER_SHELL_V1_LAYER_TOP], &rdata);
     render_layer(&output->layers[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY], &rdata);
