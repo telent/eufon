@@ -230,6 +230,8 @@ output_frame_notify(struct wl_listener *listener, void *data)
         wl_signal_emit(&view->events.post_render, &rdata);
     }
 
+    wl_signal_emit(&output->events.render, output);
+
     render_layer(&output->layers[ZWLR_LAYER_SHELL_V1_LAYER_TOP], &rdata);
     render_layer(&output->layers[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY], &rdata);
 
@@ -372,6 +374,7 @@ new_output_notify(struct wl_listener *listener, void *data)
     wl_signal_init(&output->events.destroy);
     wl_signal_init(&output->events.resize);
     wl_signal_init(&output->events.usable_area_change);
+    wl_signal_init(&output->events.render);
 
     wl_signal_emit(&desktop->events.new_output, output);
 }
