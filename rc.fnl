@@ -1,32 +1,52 @@
 (local { : GdkPixbuf } (require :lgi))
 (local { : view } (require :fennel))
 
-(var texture nil)
 
-(local pixels
-       (let [(buf err) (GdkPixbuf.Pixbuf.new_from_file "globe.png")]
-         (if (not buf) (print :err err))
-         buf))
+
+
+(fn texture-from-file [renderer filename]
+  (let [pixels
+        (let [(buf err) (GdkPixbuf.Pixbuf.new_from_file filename)]
+          (if (not buf) (print :err err))
+          buf)]
+    (renderer:texture_from_pixels
+     pixels.rowstride
+     pixels.width
+     pixels.height
+     (pixels:get_pixels))))
 
 (kiwmi:on
  "output"
  (fn [output]
    (output:set_mode 360 720 0)
-   (let [r (output:renderer)]
-     (set texture (r:texture_from_pixels
-                   pixels.rowstride
-                   pixels.width
-                   pixels.height
-                   (pixels:get_pixels)))
+   (let [r (output:renderer)
+         kill (texture-from-file r "close-window.png")
+         launch (texture-from-file r "launcher.png")
+         spinner (texture-from-file r "carousel.png")]
      (output:on "render"
                 (fn [{: output : renderer}]
-                  (renderer:draw_texture
-                   texture
-                   [1 0 0
-                    0 1 0
-                    0 0 1]
-                   150 150 0.7)))
-     (print :texture texture))))
+                  (let [bar-height 40
+                        matrix [1 0 0
+                                0 1 0
+                                0 0 1]]
+                    (renderer:draw_rect :#00000077
+                                        0 (- 720 bar-height)
+                                        690 360 bar-height)
+                    (renderer:draw_texture
+                     kill
+                     matrix
+                     30 (- 720 bar-height)
+                     0.7)
+                    (renderer:draw_texture
+                     launch matrix
+                     (- 180 (/ bar-height 2)) (- 720 bar-height)
+                     0.7)
+                    (renderer:draw_texture
+                     spinner
+                     matrix
+                     (- 360 30 bar-height) (- 720 bar-height)
+                     0.7)))))))
+
 
 (kiwmi:on "view"
           (fn [view]
