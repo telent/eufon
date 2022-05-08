@@ -47,6 +47,31 @@
                      (- 360 30 bar-height) (- 720 bar-height)
                      0.7)))))))
 
+(fn kill-window []
+  (print "DIE")
+  true)
+
+(fn launch []
+  (print "WHOOSH")
+  true)
+
+(fn carousel []
+  (print "spin spin sugar")
+  true)
+
+(let [cursor (kiwmi:cursor)]
+  (cursor:on "button_down"
+             (fn [button]
+               (let [(x y) (cursor:pos)]
+                 (if (> y 680)
+                     (if (< x 70)
+                         (kill-window)
+                         (and (< 150 x) (< x 190))
+                         (launch)
+                         (and (< 285 x) (< x 330))
+                         (carousel)
+                         false))))))
+
 
 (kiwmi:on "view"
           (fn [view]
