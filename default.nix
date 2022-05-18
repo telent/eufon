@@ -1,5 +1,6 @@
 { stdenv
 , callPackage
+, debug ? false
 , fetchFromGitHub
 
 , fennel
@@ -45,7 +46,7 @@ let
     penlight
 
   ]);
-  kiwmi = callPackage ./kiwmi.nix { lua = lua5_3; };
+  kiwmi = callPackage ./kiwmi.nix { lua = lua5_3; inherit debug; };
   GIO_EXTRA_MODULES = "${glib-networking}/lib/gio/modules";
 in
 stdenv.mkDerivation {

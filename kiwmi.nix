@@ -1,5 +1,7 @@
 { lib
 , stdenv
+, debug ? false
+
 , fetchFromGitHub
 , cairo
 , fennel
@@ -53,5 +55,6 @@ stdenv.mkDerivation rec {
     xwayland
   ];
 
-#  mesonFlags = [ "-Dxwayland=enabled" ];
+  dontStrip = debug;
+  mesonFlags = lib.optionals debug [ "--buildtype=debug" ];
 }
