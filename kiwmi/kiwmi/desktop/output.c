@@ -101,29 +101,36 @@ render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
     struct kiwmi_render_data *rdata = data;
     struct kiwmi_view *view         = rdata->data;
     struct wlr_output *wlr_output   = rdata->output;
+    float mat[9] = { 1,0,0, 0,1,0, 0,0,1 };
 
     struct wlr_texture *texture = wlr_surface_get_texture(surface);
     if (!texture) {
         return;
     }
 
-    int ox = rdata->output_lx + sx + view->x - view->geom.x;
-    int oy = rdata->output_ly + sy + view->y - view->geom.y;
+    wlr_matrix_translate(mat,
+			 sx + view->x - view->geom.x,
+			 sy + view->y - view->geom.y);
+    wlr_matrix_scale(mat, surface->current.width, surface->current.height);
+    wlr_matrix_multiply(mat, view->matrix, mat);
 
-    struct wlr_box box = {
-        .x      = ox * wlr_output->scale,
-        .y      = oy * wlr_output->scale,
-        .width  = surface->current.width * wlr_output->scale,
-        .height = surface->current.height * wlr_output->scale,
-    };
-
-    float matrix[9];
     enum wl_output_transform transform =
         wlr_output_transform_invert(surface->current.transform);
-    wlr_matrix_project_box(
-        matrix, &box, transform, 0, wlr_output->transform_matrix);
 
-    wlr_render_texture_with_matrix(rdata->renderer, texture, matrix, 1);
+    if (transform != WL_OUTPUT_TRANSFORM_NORMAL) {
+	wlr_matrix_translate(mat, 0.5, 0.5);
+	wlr_matrix_transform(mat, transform);
+	wlr_matrix_translate(mat, -0.5, -0.5);
+    }
+
+    /* looking at the definition of wlr_matrix_project_box,
+     * wlr_output->transform_matrix would be
+     * better named wlr_output->projection_matrix
+     */
+
+    wlr_matrix_multiply(mat, wlr_output->transform_matrix, mat);
+
+    wlr_render_texture_with_matrix(rdata->renderer, texture, mat, 1);
 
     wlr_surface_send_frame_done(surface, rdata->when);
 }

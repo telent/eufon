@@ -248,6 +248,49 @@ l_kiwmi_view_move(lua_State *L)
 }
 
 static int
+l_kiwmi_view_matrix(lua_State *L)
+{
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_view");
+
+    if (!obj->valid) {
+        return luaL_error(L, "kiwmi_view no longer valid");
+    }
+
+    struct kiwmi_view *view = obj->object;
+
+    lua_newtable(L);
+    for(int i=0; i< 9; i++) {
+	lua_pushnumber(L, view->matrix[i]);
+	lua_seti(L, -2, 1 + i);
+    }
+
+    return 1;
+}
+
+static int
+l_kiwmi_view_set_matrix(lua_State *L)
+{
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_view");
+
+    if (!obj->valid) {
+        return luaL_error(L, "kiwmi_view no longer valid");
+    }
+
+    struct kiwmi_view *view = obj->object;
+
+    luaL_checktype(L, 2, LUA_TTABLE);
+
+    for(int i=0; i< 9; i++) {
+	lua_geti(L, 2, 1 + i);
+	view->matrix[i] = lua_tonumber(L, -1);
+    }
+
+    return 0;
+}
+
+static int
 l_kiwmi_view_pid(lua_State *L)
 {
     struct kiwmi_object *obj =
@@ -434,6 +477,8 @@ static const luaL_Reg kiwmi_view_methods[] = {
     {"imove", l_kiwmi_view_imove},
     {"iresize", l_kiwmi_view_iresize},
     {"move", l_kiwmi_view_move},
+    {"matrix", l_kiwmi_view_matrix},
+    {"set_matrix", l_kiwmi_view_set_matrix},
     {"on", luaK_callback_register_dispatch},
     {"pid", l_kiwmi_view_pid},
     {"pos", l_kiwmi_view_pos},

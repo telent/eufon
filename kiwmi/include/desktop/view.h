@@ -54,6 +54,7 @@ struct kiwmi_view {
 
     int x;
     int y;
+    float matrix[9];
 
     bool mapped;
     bool hidden;

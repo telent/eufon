@@ -293,6 +293,11 @@ view_create(
 
     view->x = 0;
     view->y = 0;
+    for(int r=0; r < 3; r++) {
+	for(int c=0; c < 3; c++) {
+	    view->matrix[r*3+c] = (r == c) ? 1 : 0;
+	}
+    }
 
     wl_list_init(&view->children);
 
