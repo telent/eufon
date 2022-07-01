@@ -28,32 +28,34 @@
  "output"
  (fn [output]
    (output:set_mode 360 720 0)
-   (let [r (output:renderer)
+   (let [[width height] (output:size)
+         r (output:renderer)
          kill (texture-from-file r "close-window.png")
          launch (texture-from-file r "launcher.png")
          spinner (texture-from-file r "carousel.png")]
      (output:on "render"
                 (fn [{: output : renderer}]
-                  (let [bar-height 40
+                  (let [bar-height (/ height 15)
                         matrix [1 0 0
                                 0 1 0
                                 0 0 1]]
                     (renderer:draw_rect :#00000077
-                                        0 (- 720 bar-height)
-                                        690 360 bar-height)
+                                        0 (- height bar-height)
+                                        width bar-height)
                     (renderer:draw_texture
                      kill
                      matrix
-                     30 (- 720 bar-height)
+                     30 (- height bar-height)
                      0.7)
                     (renderer:draw_texture
-                     launch matrix
-                     (- 180 (/ bar-height 2)) (- 720 bar-height)
+                     launch
+                     matrix
+                     (- (/ width 2) (/ bar-height 2)) (- height bar-height)
                      0.7)
                     (renderer:draw_texture
                      spinner
                      matrix
-                     (- 360 30 bar-height) (- 720 bar-height)
+                     (- width 30 bar-height) (- height bar-height)
                      0.7)))))))
 
 (fn kill-window []
