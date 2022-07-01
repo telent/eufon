@@ -25,6 +25,13 @@ As of 2022 these principles are more aspirational than actual.
 is suboptimally hairy, at least for the moment: Nix makes a wrapper
 script for the Lua executable that has appropriate `LUA_PATH` and
 `LUA_CPATH` settings, but it doesn't do the same for kiwmi.
+## Connecting to the repl
+
+If you are using the example rc.fnl, it opens a Unix socket that you
+can connect to and interact with a Fennel REPL. I use
+[socat](http://www.dest-unreach.org/socat/) for this purpose:
+
+    $ socat - unix-connect:${XDG_RUNTIME_DIR}/kiwmi-repl.wayland-1.socket
 
 
 # TODO

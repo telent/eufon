@@ -1,7 +1,16 @@
 (local { : GdkPixbuf } (require :lgi))
 (local { : view } (require :fennel))
 
+(local socket-repl (require :socket-repl))
 
+(let [repl-socket-name
+      (..
+       (: (os.getenv "XDG_RUNTIME_DIR") :gsub "/$" "")
+       "/kiwmi-repl."
+       (os.getenv "WAYLAND_DISPLAY")
+       ".socket"
+       )]
+  (socket-repl.start repl-socket-name))
 
 
 (fn texture-from-file [renderer filename]
