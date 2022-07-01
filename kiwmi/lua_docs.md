@@ -33,6 +33,13 @@ Sets the background color (shown behind all views) to `color` (in the format #rr
 
 Returns a reference to the cursor object.
 
+#### kiwmi:event_loop_add_fd(fd, mode, callback)
+
+By registering with the event loop, arrange for  `callback` to be called
+whenever there is activity on the file descriptor `fd`. The `mode` parameter
+is one of `O_RDWR`, `O_RDONLY`, `O_WRONLY` as defined in luaposix
+`posix.fcntl` module.
+
 #### kiwmi:focused_view()
 
 Returns the currently focused view.

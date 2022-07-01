@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <lauxlib.h>
 #include <wayland-server.h>
@@ -209,6 +210,71 @@ l_kiwmi_server_quit(lua_State *L)
 }
 
 static int
+kiwmi_server_event_loop_fd_handler(int fd, uint32_t mask, void *data)
+{
+    struct kiwmi_lua_callback *lc = data;
+    lua_State *L                  = lc->server->lua->L;
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, lc->callback_ref);
+    lua_pushvalue(L, -1);
+    lua_pushinteger(L, fd);
+    lua_pushinteger(L, mask);
+
+    if (lua_pcall(L, 2, 0, 0)) {
+        wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));
+    }
+    /*
+      FIXME we need to call
+	luaL_unref(L, LUA_REGISTRYINDEX, lc->callback_ref);
+	free(lc);
+
+      when the file is closed, but probably not before then
+    */
+    return true;
+}
+
+static int
+l_kiwmi_server_event_loop_add_fd(lua_State *L)
+{
+    /* args : self, fd, mode,  handler */
+    struct kiwmi_object *obj =
+        *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_server");
+
+    struct kiwmi_server *server = obj->object;
+
+
+    int fd = lua_tonumber(L, 2);
+    int mode = lua_tonumber(L, 3);
+    luaL_checktype(L, 4, LUA_TFUNCTION); // callback
+
+    int event_types;
+    switch(mode) {
+    case O_WRONLY: event_types = WL_EVENT_WRITABLE; break;
+    case O_RDONLY: event_types = WL_EVENT_READABLE; break;
+    default: event_types = WL_EVENT_WRITABLE | WL_EVENT_READABLE; break;
+    }
+
+    struct kiwmi_lua_callback *lc = malloc(sizeof(*lc));
+    if (!lc) {
+        return luaL_error(L, "failed to allocate kiwmi_lua_callback");
+    }
+
+    wlr_log(WLR_INFO, "add fd %d lc=%x\n", fd, lc);
+
+    lc->server       = server;
+    /* luaL_ref pops last parameter (callback) from stack */
+    lc->callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    wl_event_loop_add_fd(server->wl_event_loop,
+			 fd,
+			 event_types,
+			 kiwmi_server_event_loop_fd_handler,
+			 lc);
+    return true;
+}
+
+
+static int
 kiwmi_server_schedule_handler(void *data)
 {
     struct kiwmi_lua_callback *lc = data;
@@ -395,6 +461,7 @@ static const luaL_Reg kiwmi_server_methods[] = {
     {"verbosity", l_kiwmi_server_verbosity},
     {"view_at", l_kiwmi_server_view_at},
     {"outputs", l_kiwmi_server_next_output},
+    {"event_loop_add_fd", l_kiwmi_server_event_loop_add_fd},
     {NULL, NULL},
 };
 
