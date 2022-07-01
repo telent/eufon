@@ -13,6 +13,9 @@
        )]
   (socket-repl.start repl-socket-name))
 
+(fn resize-wayland-backend [output]
+  (when (string.find (output:name) "^WL-")
+    (output:set_mode 360 720 0)))
 
 (kiwmi:on
  "output"
