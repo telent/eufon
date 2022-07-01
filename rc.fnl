@@ -24,10 +24,15 @@
      pixels.height
      (pixels:get_pixels))))
 
+
+(fn resize-wayland-backend [output]
+  (when (string.find (output:name) "^WL-")
+    (output:set_mode 360 720 0)))
+
 (kiwmi:on
  "output"
  (fn [output]
-   (output:set_mode 360 720 0)
+   (resize-wayland-backend output)
    (let [[width height] (output:size)
          r (output:renderer)
          kill (texture-from-file r "close-window.png")
