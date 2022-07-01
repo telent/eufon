@@ -18,13 +18,13 @@ As of 2022 these principles are more aspirational than actual.
 
 ## Running it
 
-     $ nix-shell build.nix
-     nix-shell$ make run
+     $ nix-shell --run "kiwmi -c init.lua"
 
-`make run` executes `lua -e 'os.execute("kiwmi -c init.lua")'`.  This
-is suboptimally hairy, at least for the moment: Nix makes a wrapper
-script for the Lua executable that has appropriate `LUA_PATH` and
-`LUA_CPATH` settings, but it doesn't do the same for kiwmi.
+`shell.nix` sets `LUA_PATH` and `LUA_CPATH` settings appropriately -
+if you want to write a real derivation (I'll get to it eventually)
+you'll need to sort that out yourself. Nix generates a wrapper script
+for the Lua interpreter itself, but it doesn't do the same for kiwmi.
+
 ## Connecting to the repl
 
 If you are using the example rc.fnl, it opens a Unix socket that you
@@ -38,22 +38,22 @@ can connect to and interact with a Fennel REPL. I use
 
 ## Packages
 
-[X] notifications (crier)
-[ ] web browser (just)
-[ ] keyboard
-[ ] wifi network chooser
-[ ] settings: toggle network interfaces, change volume & screen brightness
+- [X] notifications (crier)
+- [X] web browser (just)
+- [ ] keyboard
+- [ ] wifi network chooser
+- [ ] settings: toggle network interfaces, change volume & screen brightness
 
 ## Other
 
-[ ] better window management
- - gestures to switch view
- - gesture to launch terminal?
- - some way to kill an app
- - kiwmi may or may not have touch support
+- [ ] better window management
+	- gestures to switch view
+	- gesture to launch terminal?
+	- some way to kill an app
+	- kiwmi may or may not have touch support
 
-[ ] some way to add launcher shortcuts for Fennel functions
-[ ] hook up system to session bus, to handle incoming calls
-[ ] kiwmi: support reloading config or otherwise making live changes
-[ ] why are overlay windows overlapping regular view?
-[ ] screen lock
+- [ ] some way to add launcher shortcuts for Fennel functions
+- [ ] hook up system to session bus, to handle incoming calls
+- [X] kiwmi: support reloading config or otherwise making live changes
+- [ ] why are overlay windows overlapping regular view?
+- [ ] screen lock
