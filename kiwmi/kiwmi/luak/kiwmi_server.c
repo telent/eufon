@@ -216,20 +216,21 @@ kiwmi_server_event_loop_fd_handler(int fd, uint32_t mask, void *data)
     lua_State *L                  = lc->server->lua->L;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, lc->callback_ref);
-    lua_pushvalue(L, -1);
     lua_pushinteger(L, fd);
     lua_pushinteger(L, mask);
 
-    if (lua_pcall(L, 2, 0, 0)) {
+    if (lua_pcall(L, 2, 1, 0)) {
         wlr_log(WLR_ERROR, "%s", lua_tostring(L, -1));
     }
-    /*
-      FIXME we need to call
+
+    /* if callback returns false/nil, remove the handler */
+    if (! lua_toboolean(L, -1)) {
+	wl_event_source_remove(lc->event_source);
+
 	luaL_unref(L, LUA_REGISTRYINDEX, lc->callback_ref);
 	free(lc);
-
-      when the file is closed, but probably not before then
-    */
+    }
+    lua_pop(L, -1);
     return true;
 }
 
@@ -241,7 +242,6 @@ l_kiwmi_server_event_loop_add_fd(lua_State *L)
         *(struct kiwmi_object **)luaL_checkudata(L, 1, "kiwmi_server");
 
     struct kiwmi_server *server = obj->object;
-
 
     int fd = lua_tonumber(L, 2);
     int mode = lua_tonumber(L, 3);
@@ -265,12 +265,14 @@ l_kiwmi_server_event_loop_add_fd(lua_State *L)
     /* luaL_ref pops last parameter (callback) from stack */
     lc->callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    wl_event_loop_add_fd(server->wl_event_loop,
-			 fd,
-			 event_types,
-			 kiwmi_server_event_loop_fd_handler,
-			 lc);
-    return true;
+    lc->event_source =
+	wl_event_loop_add_fd(server->wl_event_loop,
+			     fd,
+			     event_types,
+			     kiwmi_server_event_loop_fd_handler,
+			     lc);
+
+    return 0;
 }
 
 

@@ -40,6 +40,9 @@ whenever there is activity on the file descriptor `fd`. The `mode` parameter
 is one of `O_RDWR`, `O_RDONLY`, `O_WRONLY` as defined in luaposix
 `posix.fcntl` module.
 
+If `callback` returns false or nil, the handler will be unregistered
+from the event loop and not called again.
+
 #### kiwmi:focused_view()
 
 Returns the currently focused view.

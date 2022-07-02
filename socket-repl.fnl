@@ -21,16 +21,28 @@
     ))
 
 (fn start [pathname]
-  (print pathname)
   (unistd.unlink pathname)
   (unix-socket-listener
    pathname
    (fn [fd]
      (let [sock (fdopen fd "w+")
            repl-coro (coroutine.create repl)]
-       (print :fd fd :sock sock)
        (watch-fd fd fcntl.O_RDONLY
-                 #(coroutine.resume repl-coro (unistd.read $1 1024)))
+                 (fn [fd]
+                   (let [buf (unistd.read fd 1024)
+                         input
+                         (if (and buf (> (# buf) 0))
+                             buf
+                             "\n,exit")]
+                         (coroutine.resume repl-coro input))
+                   (if (= (coroutine.status repl-coro) :dead)
+                       (do
+                         (sock:write "bye!\n")
+                         (sock:close)
+                         (unistd.close fd)
+                         false)
+                       true
+                       )))
        (coroutine.resume repl-coro
                          {:readChunk
                           (fn [{: stack-size}]
