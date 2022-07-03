@@ -1,6 +1,7 @@
 (local { : view } (require :fennel))
 
 (local texture (require :texture))
+(local matrix (require :matrix))
 (local socket-repl (require :socket-repl))
 
 (let [repl-socket-name
@@ -23,25 +24,23 @@
          spinner (texture.from-file r "carousel.png")]
      (output:on "render"
                 (fn [{: output : renderer}]
-                  (let [bar-height 40
-                        matrix [1 0 0
-                                0 1 0
-                                0 0 1]]
+                  (let [bar-height 40]
                     (renderer:draw_rect :#00000077
                                         0 (- 720 bar-height)
                                         690 360 bar-height)
                     (renderer:draw_texture
                      kill
-                     matrix
+                     matrix.identity
                      30 (- 720 bar-height)
                      0.7)
                     (renderer:draw_texture
-                     launch matrix
+                     launch
+                     matrix.identity
                      (- 180 (/ bar-height 2)) (- 720 bar-height)
                      0.7)
                     (renderer:draw_texture
                      spinner
-                     matrix
+                     matrix.identity
                      (- 360 30 bar-height) (- 720 bar-height)
                      0.7)))))))
 
