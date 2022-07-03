@@ -17,37 +17,6 @@
   (when (string.find (output:name) "^WL-")
     (output:set_mode 360 720 0)))
 
-(kiwmi:on
- "output"
- (fn [output]
-   (resize-wayland-backend output)
-   (let [(width height) (output:size)
-         r (output:renderer)
-         kill (texture.from-file r "close-window.png")
-         launch (texture.from-file r "launcher.png")
-         spinner (texture.from-file r "carousel.png")]
-     (output:on "render"
-                (fn [{: output : renderer}]
-                  (let [bar-height (/ height 15)]
-                    (renderer:draw_rect :#00000077
-                                        0 (- height bar-height)
-                                        width bar-height)
-                    (renderer:draw_texture
-                     kill
-                     matrix.identity
-                     30 (- height bar-height)
-                     0.7)
-                    (renderer:draw_texture
-                     launch
-                     matrix.identity
-                     (- (/ width 2) (/ bar-height 2)) (- height bar-height)
-                     0.7)
-                    (renderer:draw_texture
-                     spinner
-                     matrix.identity
-                     (- width 30 bar-height) (- height bar-height)
-                     0.7)))))))
-
 (fn kill-window []
   (print "DIE")
   true)
@@ -60,25 +29,95 @@
   (print "spin spin sugar")
   true)
 
+(fn placements [output]
+  (let [(width height) (output:size)
+        bar-height (/ height 15)]
+    {
+
+     :application {
+           :x 0
+           :y 0
+           :w width
+           :h (- height (* bar-height 1.1))
+           }
+     :bar {
+           :x 0
+           :y (- height (* bar-height 1.1))
+           :w width
+           :h (* bar-height 1.1)
+           }
+     :kill {
+            :x (- (* width 0.25) (/ bar-height 2))
+            :y (- height bar-height)
+            :w bar-height
+            :h bar-height
+            :on-press kill-window
+            }
+     :launch {
+              :x (- (* width 0.5) (/ bar-height 2))
+              :y (- height bar-height)
+              :w bar-height
+              :h bar-height
+              :on-press launch
+              }
+     :overview {
+                :x (- (* width 0.75) (/ bar-height 2))
+                :y (- height bar-height)
+                :w bar-height
+                :h bar-height
+                :on-press carousel
+                }
+     }))
+
+(kiwmi:on
+ "output"
+ (fn [output]
+   (resize-wayland-backend output)
+   (let [(width height) (output:size)
+         r (output:renderer)
+         kill (texture.from-file r "close-window.png")
+         launch (texture.from-file r "launcher.png")
+         spinner (texture.from-file r "carousel.png")]
+     (output:on "render"
+                (fn [{: output : renderer}]
+                  (let [buttons (placements output)]
+                    (renderer:draw_rect :#77000077
+                                        buttons.bar.x buttons.bar.y
+                                        buttons.bar.w buttons.bar.h)
+                    (renderer:draw_texture
+                     kill
+                     matrix.identity
+                     buttons.kill.x buttons.kill.y
+                     0.7)
+                    (renderer:draw_texture
+                     launch
+                     matrix.identity
+                     buttons.launch.x buttons.launch.y
+                     0.7)
+                    (renderer:draw_texture
+                     spinner
+                     matrix.identity
+                     buttons.overview.x buttons.overview.y
+                     0.7)))))))
+
+
 (let [cursor (kiwmi:cursor)]
   (cursor:on "button_down"
              (fn [button]
                (let [(x y) (cursor:pos)]
-                 (if (> y 680)
-                     (if (< x 70)
-                         (kill-window)
-                         (and (< 150 x) (< x 190))
-                         (launch)
-                         (and (< 285 x) (< x 330))
-                         (carousel)
-                         false))))))
-
+                 (each [name attribs (pairs (placements (kiwmi:active_output)))]
+                   (if (and
+                        (<= attribs.x x)
+                        (< x (+ attribs.x attribs.w))
+                        (<= attribs.y y)
+                        (< y (+ attribs.y attribs.h)))
+                       (if attribs.on-press (attribs.on-press))))))))
 
 (kiwmi:on "view"
           (fn [view]
-            (let [(w h) (: (kiwmi:active_output) :size)]
-              (view:resize w h)
-              (view:move 0 0))
+            (let [geom (placements (kiwmi:active_output))]
+              (view:resize geom.application.w geom.application.h)
+              (view:move geom.application.x geom.application.y))
             (view:focus)
             (view:show)
             (view:on "request_move" #(view:imove))
