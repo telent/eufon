@@ -4,6 +4,13 @@
 (local matrix (require :matrix))
 (local socket-repl (require :socket-repl))
 
+(local app-state
+       {
+        :in-overview false
+        :focus-view nil
+        :views []
+        })
+
 (let [repl-socket-name
       (..
        (: (os.getenv "XDG_RUNTIME_DIR") :gsub "/$" "")
@@ -25,9 +32,43 @@
   (print "WHOOSH")
   true)
 
+(fn show-overview []
+  (let [facets 64
+        angle (/ (* 2 math.pi) facets)
+        scale 0.6
+        y-offset (+ (* 1 680)
+                    (/ (* 360 facets) (* 2 math.pi)))
+        ]
+    (each [i view (ipairs app-state.views)]
+      (doto view
+        (: :set_matrix
+           (-> matrix.identity
+               (matrix.scale scale scale)
+               (matrix.translate (*  2 180) (+ y-offset))
+               (matrix.rotate (/ (* (- i 2
+                                       ) angle) 1))
+               (matrix.translate (* -2 180) (- y-offset))
+               (matrix.translate 120 150)
+               ))
+        (: :show)))))
+
+
+(fn hide-overview []
+  (each [k view (pairs app-state.views)]
+    (view:set_matrix matrix.identity)
+    (if (= (view:id) (app-state.focus-view:id))
+        (doto view
+          (: :show)
+          (: :focus))
+        (view:hide))))
+
 (fn carousel []
-  (print "spin spin sugar")
-  true)
+  (let [was app-state.in-overview]
+    (if was
+        (hide-overview)
+        (show-overview))
+    (: (kiwmi:active_output) :redraw)
+    (tset app-state :in-overview (not was))))
 
 (fn placements [output]
   (let [(width height) (output:size)
@@ -120,6 +161,8 @@
               (view:move geom.application.x geom.application.y))
             (view:focus)
             (view:show)
+            (tset app-state :focus-view view)
+            (table.insert app-state.views view)
             (view:on "request_move" #(view:imove))
             (view:on "request_resize" (fn [ev] (view:iresize ev.edges)))))
 
