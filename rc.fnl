@@ -1,6 +1,6 @@
-(local { : GdkPixbuf } (require :lgi))
 (local { : view } (require :fennel))
 
+(local texture (require :texture))
 (local socket-repl (require :socket-repl))
 
 (let [repl-socket-name
@@ -13,25 +13,14 @@
   (socket-repl.start repl-socket-name))
 
 
-(fn texture-from-file [renderer filename]
-  (let [pixels
-        (let [(buf err) (GdkPixbuf.Pixbuf.new_from_file filename)]
-          (if (not buf) (print :err err))
-          buf)]
-    (renderer:texture_from_pixels
-     pixels.rowstride
-     pixels.width
-     pixels.height
-     (pixels:get_pixels))))
-
 (kiwmi:on
  "output"
  (fn [output]
    (output:set_mode 360 720 0)
    (let [r (output:renderer)
-         kill (texture-from-file r "close-window.png")
-         launch (texture-from-file r "launcher.png")
-         spinner (texture-from-file r "carousel.png")]
+         kill (texture.from-file r "close-window.png")
+         launch (texture.from-file r "launcher.png")
+         spinner (texture.from-file r "carousel.png")]
      (output:on "render"
                 (fn [{: output : renderer}]
                   (let [bar-height 40
