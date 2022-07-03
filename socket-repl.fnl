@@ -20,6 +20,12 @@
         (on-connected connected-fd)))
     ))
 
+(fn get-input [fd]
+  (let [buf (unistd.read fd 1024)]
+    (if (and buf (> (# buf) 0))
+        buf
+        "\n,exit")))
+
 (fn start [pathname]
   (unistd.unlink pathname)
   (unix-socket-listener
@@ -29,17 +35,11 @@
            repl-coro (coroutine.create repl)]
        (watch-fd fd fcntl.O_RDONLY
                  (fn [fd]
-                   (let [buf (unistd.read fd 1024)
-                         input
-                         (if (and buf (> (# buf) 0))
-                             buf
-                             "\n,exit")]
-                         (coroutine.resume repl-coro input))
+                   (coroutine.resume repl-coro (get-input  fd))
                    (if (= (coroutine.status repl-coro) :dead)
                        (do
                          (sock:write "bye!\n")
                          (sock:close)
-                         (unistd.close fd)
                          false)
                        true
                        )))
