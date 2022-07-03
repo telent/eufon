@@ -77,7 +77,7 @@
          r (output:renderer)
          kill (texture.from-file r "close-window.png")
          launch (texture.from-file r "launcher.png")
-         spinner (texture.from-file r "carousel.png")]
+         overview (texture.from-file r "carousel.png")]
      (output:on "render"
                 (fn [{: output : renderer}]
                   (let [buttons (placements output)]
@@ -95,7 +95,7 @@
                      buttons.launch.x buttons.launch.y
                      0.7)
                     (renderer:draw_texture
-                     spinner
+                     overview
                      matrix.identity
                      buttons.overview.x buttons.overview.y
                      0.7)))))))
