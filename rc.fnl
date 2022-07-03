@@ -17,8 +17,8 @@
 (kiwmi:on
  "output"
  (fn [output]
-   (output:set_mode 360 720 0)
-   (let [[width height] (output:size)
+   (resize-wayland-backend output)
+   (let [(width height) (output:size)
          r (output:renderer)
          kill (texture.from-file r "close-window.png")
          launch (texture.from-file r "launcher.png")
