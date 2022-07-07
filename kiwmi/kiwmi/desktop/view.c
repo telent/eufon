@@ -15,6 +15,8 @@
 #include "input/seat.h"
 #include "server.h"
 
+#include "vvector.h"
+
 void
 view_close(struct kiwmi_view *view)
 {
@@ -182,13 +184,30 @@ view_at(
     double *sx,
     double *sy)
 {
+    float xy[2] = { lx, ly };
+    float xy_[2];
+    float transform[3][3];
+    float inv_transform[3][3];
+    float det;
+
     struct kiwmi_view *view;
+
     wl_list_for_each (view, &desktop->views, link) {
         if (view->hidden || !view->mapped) {
             continue;
         }
 
-        if (surface_at(view, surface, lx, ly, sx, sy)) {
+	/*
+	  The view may have transformation matrix, so we need to map
+	  lx, ly into the view co-ordinate space before calling
+	  surface_at. Or possibly vice versa. This stuff makes my head
+	  hurt.
+	*/
+	memcpy(transform, view->matrix, sizeof transform);
+	INVERT_3X3(inv_transform, det, transform);
+	MAT_DOT_VEC_2X3(xy_, inv_transform, xy);
+
+	if (surface_at(view, surface, xy_[0], xy_[1], sx, sy)) {
             return view;
         }
     }
