@@ -110,6 +110,23 @@
                 }
      }))
 
+(fn choose-view-at [x y]
+  (let [view (kiwmi:view_at x y)]
+    (tset app-state :focus-view view)
+    (tset app-state :in-overview false)
+    (hide-overview)
+    true))
+
+(let [cursor (kiwmi:cursor)]
+  (cursor:on "button_up"
+             (fn [button-id]
+               (when app-state.in-overview
+                 (let [geom (placements (kiwmi:active_output))
+                       (x y) (cursor:pos)]
+                   (if (<  y geom.application.h)
+                       (choose-view-at x y)
+                       false))))))
+
 (kiwmi:on
  "output"
  (fn [output]
