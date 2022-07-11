@@ -10,6 +10,7 @@
 , gtk3
 , gtk-layer-shell
 , lua5_3
+, socat
 } :
 let
   lua = lua5_3;
@@ -62,6 +63,13 @@ stdenv.mkDerivation {
     gtk3
     webkitgtk
   ];
+
+  installPhase = ''
+    mkdir -p $out/bin
+    substitute bin/eufon.sh $out/bin/eufon \
+      --replace SOCAT=socat SOCAT=${socat}/bin/socat
+    chmod +x $out/bin/eufon
+  '';
 
   src = ./.;
 }
