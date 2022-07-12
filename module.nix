@@ -40,6 +40,7 @@
         StandardInput = "tty";
         StandardError = "journal";
         StandardOutput = "journal";
+        SyslogIdentifier = "eufon";
         User = "dan";
         ExecStart = run-eufon;
         Restart = "always";
