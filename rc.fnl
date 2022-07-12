@@ -1,3 +1,5 @@
+;; -*- mode: Fennel;
+
 (local { : view } (require :fennel))
 
 (local texture (require :texture))
@@ -190,3 +192,7 @@
 (kiwmi:spawn "lua -l fennelrun crier/crier.fnl")
 (kiwmi:spawn "lua -l fennelrun just/just.fnl")
 ;(kiwmi:spawn "foot")
+
+;; Local Variables:
+;; inferior-lisp-program: "eufonctl"
+;; End:
