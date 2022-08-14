@@ -1,4 +1,5 @@
 { config, lib, pkgs, ... }:
+let eufon = pkgs.callPckage ./default.nix; in
 {
   systemd.services."eufon" = {
     wants = [
@@ -19,6 +20,7 @@
       "systemd-udev-settle.service"
     ];
     conflicts = [
+      "getty@tty1.service"      # not sure if needed
       "getty@tty2.service"
       "plymouth-quit.service"
     ];
@@ -27,11 +29,11 @@
       let run-eufon = pkgs.writeScript "run-eufon" ''
           #!${pkgs.bash}/bin/bash
           source ${config.system.build.setEnvironment}
-          ${pkgs.dbus}/bin/dbus-run-session /home/dan/src/eufon/run.sh
+          ${pkgs.dbus}/bin/dbus-run-session ${eufon}/bin/eufon
           systemd-cat echo "dbus-run-session $?"
         '';
       in {
-        WorkingDirectory = "/home/dan/src/eufon";
+        WorkingDirectory = "${eufon}";
         TTYPath = "/dev/tty2";
         TTYReset = "yes";
         TTYVHangup = "yes";
@@ -52,7 +54,13 @@
   environment.systemPackages = with pkgs; [
     git
   ];
-  networking.networkmanager.enable = true;
+
+  boot.postBootCommands = lib.mkOrder (-1) ''
+    brightness=4000
+    echo "Setting brightness to $brightness"
+    echo $brightness > /sys/class/backlight/wled/brightness
+  '';
+
   services.logind.extraConfig = ''
     HandlePowerKey=ignore
   '';

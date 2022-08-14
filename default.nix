@@ -11,6 +11,9 @@
 , gtk-layer-shell
 , lua5_3
 , socat
+, cpio
+
+, makeWrapper
 } :
 let
   lua = lua5_3;
@@ -63,11 +66,21 @@ stdenv.mkDerivation {
     gtk3
     webkitgtk
   ];
+  nativeBuildInputs = [ cpio makeWrapper ];
 
   installPhase = ''
+    export LUA_PATH="`lua -e 'print(package.path)'`"
+    export LUA_CPATH="`lua -e 'print(package.cpath)'`"
     mkdir -p $out/bin
-    substitute bin/eufon.sh $out/bin/eufon \
+    find . -name kiwmi -prune -o -type l -prune -o -print0 | cpio -0 -v --pass-through $out
+    substitute bin/eufonctl.sh $out/bin/eufonctl \
       --replace SOCAT=socat SOCAT=${socat}/bin/socat
+    makeWrapper ${kiwmi}/bin/kiwmi $out/bin/eufon \
+      --set LUA_PATH ".;$out/?.fnl;$LUA_PATH" \
+      --set LUA_CPATH ".;$out/?.so;$LUA_CPATH" \
+      --prefix PATH : ${kiwmi}/bin \
+      --add-flags "-c $out/init.lua"
+
     chmod +x $out/bin/eufon
   '';
 
