@@ -21,23 +21,24 @@ repo is basically in an advanced state of brokenness_
 
 ## Running the shell/apps locally
 
-Eufon is intendfed for phones, but you may prefer to develop on a
-desktop device of some kind, especially if you're changing C code and
-have that edit/compile run cycle to go round. You can start the shell
-locally with
+    $ nix-shell
+    nix-shell$ kiwmi -c init.lua 
 
-     $ nix-shell --run "kiwmi -c init.lua"
+This works on desktop or on mobile - Kiwmi is built on wlroots, which
+will open a window on your existing Wayland or X11 desktop if you're
+running one.
 
-`shell.nix` sets `LUA_PATH` and `LUA_CPATH` settings appropriately -
-if you want to write a real derivation (I'll get to it eventually)
-you'll need to sort that out yourself. Nix generates a wrapper script
-for the Lua interpreter itself, but it doesn't do the same for kiwmi.
+If you're connected over ssh and want to run Kiwmi on the console,
+further contortions are required as you don't have the permissions
+by default: run this before attempting to start Kiwmi
+
+     nix-shell -p seatd --run "sudo -b seatd -u $USER"
 
 ## Connecting to the repl
 
-If you are using the example rc.fnl, it opens a Unix socket to which
-you can connect to interact with a Fennel REPL. The `eufonctl`
-script is a wrapper around [socat](http://www.dest-unreach.org/socat/) 
+By default Eufon opens a Unix socket to which you can connect to
+interact with a Fennel REPL. The `eufonctl` script is a wrapper around
+[socat](http://www.dest-unreach.org/socat/)
 
     $ eufonctl $WAYLAND_DISPLAY
 
