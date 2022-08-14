@@ -8,7 +8,7 @@
 (local Gtk lgi.Gtk)
 
 (fn relpath [filename]
-  (.. "crier/" filename))
+  (.. (os.getenv "EUFON_PATH") "/crier/" filename))
 
 (local dbus-service-attrs
        {

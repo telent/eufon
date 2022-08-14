@@ -79,9 +79,12 @@ stdenv.mkDerivation {
     substitute bin/eufonctl.sh $out/bin/eufonctl \
       --replace SOCAT=socat SOCAT=${socat}/bin/socat
     makeWrapper ${kiwmi}/bin/kiwmi $out/bin/eufon \
-      --set LUA_PATH ".;$out/?.fnl;$LUA_PATH" \
-      --set LUA_CPATH ".;$out/?.so;$LUA_CPATH" \
-      --prefix PATH : ${kiwmi}/bin \
+      --set LUA_PATH "$out/?.lua;$LUA_PATH" \
+      --set LUA_CPATH "$LUA_CPATH" \
+      --prefix PATH : ${kiwmi}/bin:${luaWithPackages}/bin \
+      --set EUFON_PATH "$out" \
+      --set GIO_EXTRA_MODULES "${glib-networking}/lib/gio/modules" \
+      --set GI_TYPELIB_PATH "$GI_TYPELIB_PATH" \
       --add-flags "-c $out/init.lua"
 
     chmod +x $out/bin/eufon
