@@ -72,7 +72,10 @@ stdenv.mkDerivation {
     export LUA_PATH="`lua -e 'print(package.path)'`"
     export LUA_CPATH="`lua -e 'print(package.cpath)'`"
     mkdir -p $out/bin
-    find . -name kiwmi -prune -o -type l -prune -o -print0 | cpio -0 -v --pass-through $out
+    find . -name kiwmi -prune \
+        -o -type l -prune \
+        -o -name git -prune \
+        -o -print0 | cpio -0 -v --pass-through $out
     substitute bin/eufonctl.sh $out/bin/eufonctl \
       --replace SOCAT=socat SOCAT=${socat}/bin/socat
     makeWrapper ${kiwmi}/bin/kiwmi $out/bin/eufon \

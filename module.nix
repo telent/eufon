@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:
-let eufon = pkgs.callPckage ./default.nix; in
+let eufon = pkgs.callPackage ./default.nix {}; in
 {
   systemd.services."eufon" = {
     wants = [
@@ -52,7 +52,7 @@ let eufon = pkgs.callPckage ./default.nix; in
     };
   };
   environment.systemPackages = with pkgs; [
-    git
+    git eufon
   ];
 
   boot.postBootCommands = lib.mkOrder (-1) ''
