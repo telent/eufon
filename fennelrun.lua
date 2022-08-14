@@ -1,4 +1,6 @@
 local fennel = require("fennel")
 table.insert(package.loaders or package.searchers, fennel.searcher)
--- print(fennel.view(arg))
-fennel.dofile(arg[0], { correlate = true })
+fennel.path = os.getenv("EUFON_PATH")  .. "/?.fnl;" ..
+   os.getenv("EUFON_PATH")  .. "/?/init.fnl;"
+
+require(arg[0])

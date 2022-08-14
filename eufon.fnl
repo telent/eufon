@@ -34,6 +34,9 @@
   (print "WHOOSH")
   true)
 
+(fn eufon-path [f]
+  (.. (os.getenv "EUFON_PATH") "/" f))
+
 (fn show-overview []
   (let [facets 64
         angle (/ (* 2 math.pi) facets)
@@ -135,9 +138,9 @@
    (resize-wayland-backend output)
    (let [(width height) (output:size)
          r (output:renderer)
-         kill (texture.from-file r "close-window.png")
-         launch (texture.from-file r "launcher.png")
-         overview (texture.from-file r "carousel.png")]
+         kill (texture.from-file r (eufon-path "close-window.png"))
+         launch (texture.from-file r (eufon-path "launcher.png"))
+         overview (texture.from-file r (eufon-path "carousel.png"))]
      (output:on "render"
                 (fn [{: output : renderer}]
                   (let [buttons (placements output)]
@@ -185,12 +188,11 @@
             (view:on "request_move" #(view:imove))
             (view:on "request_resize" (fn [ev] (view:iresize ev.edges)))))
 
-
-;(kiwmi:spawn "swaybg -c '#ff00ff'")
-(kiwmi:spawn "lua -l fennelrun modeline.fnl")
-(kiwmi:spawn "lua -l fennelrun saturn/main.fnl")
-(kiwmi:spawn "lua -l fennelrun crier/crier.fnl")
-(kiwmi:spawn "lua -l fennelrun just/just.fnl")
+(kiwmi:spawn "swaybg -c '#ff00ff'")
+(kiwmi:spawn "lua -l fennelrun modeline")
+;(kiwmi:spawn "lua -l fennelrun saturn")
+(kiwmi:spawn "lua -l fennelrun crier")
+(kiwmi:spawn "lua -l fennelrun just https://brvt.telent.net")
 ;(kiwmi:spawn "foot")
 
 ;; Local Variables:

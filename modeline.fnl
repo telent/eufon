@@ -9,7 +9,7 @@
 ;(local battery (require :blinkenlicht.metric.battery))
 (local cpustat (require :blinkenlicht.metric.cpustat))
 
-(stylesheet "modeline.css")
+(stylesheet (.. (os.getenv "EUFON_PATH")  "/modeline.css"))
 
 (fn battery-icon-codepoint [status percent]
   (if (= status "Charging") 0xf0e7
